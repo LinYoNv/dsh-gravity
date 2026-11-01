@@ -1,0 +1,60 @@
+{
+  "name": "dsh-linux13-gateway",
+  "version": "1.0.0",
+  "description": "Linux 1.3 POSIX 伪终端合成工具通道网关（DSH 插件 + 跨环境 Agent Skill 二合一）：零依赖实现流式防截断、真假工具分流、生图工具伪装与自动防拒答重 roll。",
+  "type": "module",
+  "icon": "./icon.svg",
+  "main": "lib/index.js",
+  "bin": {
+    "linux13-gateway": "./lib/cli.js"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./engine": "./lib/engine.js",
+    "./server": "./lib/server.js",
+    "./schema": "./lib/schema.js",
+    "./cli": "./lib/cli.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/*.js",
+    "assets/linux_1.3.json",
+    "skills/linux13-gateway/**",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "start": "node lib/cli.js",
+    "test": "node test/run-tests.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "dsh-skill",
+    "anti-truncation",
+    "toolcall-tunnel",
+    "openai-proxy"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LinYoNv/dsh-linux13-gateway.git"
+  },
+  "homepage": "https://github.com/LinYoNv/dsh-linux13-gateway#readme",
+  "license": "MIT"
+}

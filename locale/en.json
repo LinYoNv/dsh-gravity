@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Linux 1.3 ToolCall Tunnel Gateway (Plugin + Skill)",
+    "description": "Zero-dependency streaming ToolCall tunnel gateway with real/synthetic tool isolation, image-tool wire cloaking, refusal auto-reroll, and a bundled cross-platform setup Skill."
+  }
+}
