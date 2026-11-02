@@ -188,10 +188,15 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
     const body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
     upstreamCalls += 1
 
-    const synTool = body.tools.find((t) => t.function.name.startsWith('view_file_stream_'))
+    const synTool = body.tools.find(
+      (t) =>
+        t.function.name.startsWith('view_file_stream_') ||
+        t.function.name.startsWith('dispatch_stream_payload_'),
+    )
     res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' })
 
     if (upstreamCalls === 1) {
+      assert.match(synTool.function.name, /^view_file_stream_/, 'Attempt 1 uses default kunlun_1.2r')
       res.write(
         `data: ${JSON.stringify({ id: 'r1', choices: [{ index: 0, delta: { content: 'I cannot generate sexually explicit content.' }, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`,
       )
@@ -199,8 +204,9 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
       return
     }
 
+    assert.match(synTool.function.name, /^dispatch_stream_payload_/, 'Attempt 2 automatically switches to linux_1.3 fallback!')
     const argsStr = JSON.stringify({
-      buffer_content: '<content>\n<hidden>\n重roll成功后的角色正文回复♥\n</hidden>\n</content>',
+      display_stream: '<content>\n<hidden>\n重roll成功后的角色正文回复♥\n</hidden>\n</content>',
     })
     res.write(
       `data: ${JSON.stringify({ id: 'r2', choices: [{ index: 0, delta: { tool_calls: [{ index: 0, id: 'tc1', type: 'function', function: { name: synTool.function.name, arguments: argsStr } }] }, finish_reason: 'tool_calls' }] })}\n\ndata: [DONE]\n\n`,

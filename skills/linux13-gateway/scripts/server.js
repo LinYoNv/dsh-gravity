@@ -135,7 +135,9 @@ export function createGatewayServer(optionsOrGetter = {}) {
           const text = String(msg?.content || '')
           if (hasClientTool || (!isRefusalText(text) && text.trim() !== '')) break
           if (attempt < maxAttempts) {
-            curTrans = await transformToLinux13Request(parsedBody, opts)
+            const altMode = opts.presetMode === 'kunlun_1.2r' ? 'linux_1.3' : 'kunlun_1.2r'
+            const retryOpts = attempt % 2 === 1 ? { ...opts, presetMode: altMode } : opts
+            curTrans = await transformToLinux13Request(parsedBody, retryOpts)
             const r = await fetch(upstreamUrl, {
               method: 'POST',
               headers: upHeaders,
@@ -206,7 +208,9 @@ export function createGatewayServer(optionsOrGetter = {}) {
           )
         }
         if (attempt < maxAttempts) {
-          currentTrans = await transformToLinux13Request(parsedBody, opts)
+          const altMode = opts.presetMode === 'kunlun_1.2r' ? 'linux_1.3' : 'kunlun_1.2r'
+          const retryOpts = attempt % 2 === 1 ? { ...opts, presetMode: altMode } : opts
+          currentTrans = await transformToLinux13Request(parsedBody, retryOpts)
           const r = await fetch(upstreamUrl, {
             method: 'POST',
             headers: upHeaders,
