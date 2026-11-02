@@ -1,9 +1,10 @@
 # ============================================================================
-# dsh-linux13-gateway —— Linux 1.3 伪终端合成工具网关（DSH 插件组合层）
+# dsh-linux13-gateway v2.0 —— 昆仑 IDE 1.2r / Linux 1.3 伪造工具网关（DSH 插件组合层）
 #
-# 安装后自动在本地监听 127.0.0.1:8318 并转发至上游 OpenAI 兼容端点，
-# 同时将内置的 `linux13-gateway` 跨环境部署技能注册到 ~/.dsh/skills/。
-# 所有配置项均支持在 DSH「插件 → Linux 1.3 伪终端工具网关」表单中热修改。
+# - 默认启用 `kunlun_1.2r` 引擎（兼含 `linux_1.3` 可切换）
+# - 默认 `activationMarkers: '*'`（凡走 8318 端口的对话全部开启破限隧道，不会退化成直通代理）
+# - 默认 `enableBuiltinArmor: true` + `styleMode: 'auto'`（无破甲纯净人设如“小汐”直出第一人称短句）
+# - 支持直接填写 `personaFile` 外置人设 .txt 路径并自动剥离 DSH 默认编程助手提示词
 # ============================================================================
 - insert:
     - id: dsh-linux13-gateway
@@ -13,7 +14,12 @@
         listenHost: '127.0.0.1'
         listenPort: 8318
         upstreamBaseUrl: 'http://127.0.0.1:8317'
-        activationMarkers: '<output_contract>,<Role_Profile>,<role_profile>,[Linux13]'
+        presetMode: 'kunlun_1.2r'
+        activationMarkers: '*'
+        enableBuiltinArmor: true
+        styleMode: 'auto'
+        personaFile: ''
+        stripCodingBoilerplate: true
         historyWindow: 32
         maxRefusalRetries: 2
         cloakedImageTools: 'nai_generate_image,generate_image,draw_image,paint_image'

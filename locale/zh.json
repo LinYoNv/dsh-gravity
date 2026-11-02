@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Linux 1.3 伪终端工具网关（插件 + Skill）",
-    "description": "基于合成工具通道（ToolCall Tunneling）的流式防截断与破限网关：支持真假工具分流、生图工具伪装、防拒答自动重 roll，并内置跨环境搭建 Skill。"
+    "title": "昆仑 1.2r / Linux 1.3 伪造工具网关（插件 + Skill）",
+    "description": "昆仑 IDE 1.2r 与 Linux 1.3 双引擎流式防截断与破限网关：内置自动破甲契约、短句人设自适应、DSH 编程提示词剥离、生图工具伪装与防拒答重 roll。"
   }
 }

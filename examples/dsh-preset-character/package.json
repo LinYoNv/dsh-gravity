@@ -1,0 +1,11 @@
+{
+  "name": "dsh-preset-character",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DSH 干净角色标准预设模板：系统提示词 100% 引用外置 .txt 人设文件（complete: true 丢弃 DSH 默认编程身份段，且移除 agent-instructions 防 <system-reminder> 污染），保留全部标准工具。",
+  "dsh": {
+    "bundle": {
+      "patch": "./patch/cordis.patch.yml"
+    }
+  }
+}

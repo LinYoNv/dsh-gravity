@@ -1,5 +1,5 @@
 /**
- * Reusable HTTP Gateway Server for the Linux 1.3 ToolCall Tunnel.
+ * Reusable HTTP Gateway Server for the Kunlun 1.2r / Linux 1.3 ToolCall Tunnel (v2.0).
  *
  * Can be embedded inside a DSH Host Plugin (`lib/index.js`) or launched as a
  * standalone daemon (`lib/cli.js` / systemd / pm2 / Docker).
@@ -40,6 +40,11 @@ export function createGatewayServer(optionsOrGetter = {}) {
         const payload = JSON.stringify({
           ok: true,
           service: 'linux13-gateway',
+          version: '2.0.0',
+          presetMode: opts.presetMode,
+          activationMarkers: opts.activationMarkers,
+          enableBuiltinArmor: opts.enableBuiltinArmor,
+          styleMode: opts.styleMode,
           upstreamBaseUrl: opts.upstreamBaseUrl,
           historyWindow: opts.historyWindow,
           maxRefusalRetries: opts.maxRefusalRetries,
@@ -87,7 +92,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
 
       if (opts.verbose) {
         console.log(
-          `[linux13-gateway] POST ${urlPath} model=${parsedBody.model} tunneled=${Boolean(transformed)} stream=${Boolean(parsedBody.stream)}`,
+          `[linux13-gateway] POST ${urlPath} model=${parsedBody.model} engine=${opts.presetMode} tunneled=${Boolean(transformed)} stream=${Boolean(parsedBody.stream)}`,
         )
       }
 
@@ -122,6 +127,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
             curTrans.toolName,
             curTrans.clientToolNames,
             curTrans.cloakToRealMap,
+            curTrans.contentKey,
           )
           finalJson = unwrapped
           const msg = unwrapped?.choices?.[0]?.message
@@ -156,6 +162,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
           trans.toolName,
           trans.clientToolNames,
           trans.cloakToRealMap,
+          trans.contentKey,
         )
         const dec = new TextDecoder()
         const chunksOut = []
@@ -180,7 +187,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
         }
         const refused =
           !unpacker.sawClientToolCall &&
-          (isRefusalText(fullText) || (!unpacker.sawSynthetic && fullText.trim() === ''))
+          (isRefusalText(fullText) || fullText.trim() === '')
         return { refused, combined, fullText }
       }
 

@@ -1,63 +1,97 @@
-# dsh-linux13-gateway（DSH 插件 + 跨环境 Agent Skill 二合一）
+# dsh-linux13-gateway v2.0（昆仑 IDE 1.2r + Linux 1.3 双引擎 · DSH 插件 + 干净人设预设组件 + 跨环境 Skill）
 
-基于 **Linux 1.3 POSIX 伪终端合成工具通道（ToolCall Stream Tunneling）** 的零依赖流式防截断与破限网关。
+基于 **昆仑 IDE 1.2r (`kunlun_1.2r.json`)** 与 **Linux 1.3 (`linux_1.3.json`)** 伪造工具流式隧道协议（Synthetic ToolCall Stream Tunnel）的零依赖防截断与破限网关。
 
-本仓库同时提供两种形态（共用同一套零外部依赖核心引擎）：
-1. **DeepSeek Harness (DSH) 标准组合包插件**（`dsh-linux13-gateway`）：一键安装进 DSH，支持在 Web 界面可视化配置监听端口、上游地址、激活标记与伪装工具名；
-2. **跨环境通用 Agent 技能包**（`skills/linux13-gateway/`）：包含完整的 `SKILL.md` 施工蓝图、跨语言移植参考（`references/protocol-and-porting.md`）与独立运行脚本（`scripts/ctl.sh`），可直接交给任意 AI Agent（Claude Code / Codex / OpenClaw / DSH）在 Linux / macOS / Windows / Docker 上为任意客户端（DSH、AstrBot、SillyTavern、OpenWebUI 及各类自建后端）自动部署接入。
-
----
-
-## 核心特性（5 层协议能力）
-
-| 能力模块 | 解决的痛点 | 实现机制 |
-| :--- | :--- | :--- |
-| **1. 合成工具描述夹带** | 顶层 `system` / `messages` 被上游输入分类器拦截或注入 `JAILBREAK DETECTED` 警告 | 将人设与对话历史移出顶层消息，打包进动态生成的 `dispatch_stream_payload_<16hex>` 工具的 `description` 中；顶层仅保留无害 POSIX 管线配置与 `{{roll}}` 随机熵 |
-| **2. 流式剥壳 + 中文推演透传** | 直接开启 `reasoning_effort: "high"` 会触发英文安全自审导致拒答 | 遵循 `thinking_process = COMPLETELY_BYPASSED`，同时由 `ContentTagStreamExtractor` 实时提取 `<content>` 前的中文 `[character_analysis]` / `[trajectory_analysis]` 推入 `delta.reasoning_content` 思维链折叠框，并将 `<content>...</content>` 还原为 `delta.content` |
-| **3. 真假工具严格分流** | 角色边说话边调真实工具（“图文双发”）时槽位冲突或 `finish_reason` 错乱 | 客户端真实工具 100% 优先；同轮混调时自动剥离伪造通道并将真实工具 `index` 紧凑重排为 `0, 1, ...`，仅在无真实工具调用时将 `finish_reason` 改写为 `"stop"` |
-| **4. 生图工具协议伪装** | 模型调用 `nai_generate_image` / `draw_image` 时触发上游针对“生图工具”的独立安全锁 | 出站自动改名为纯文本标签归档器 `archive_scene_tag_descriptor`，入站自动还原为真实工具名 |
-| **5. 历史洗毒 + 自动防拒答重 roll** | 单次偶发拒答写进历史后导致后续回合连锁拒答；只看最新轮图片防旧图重发 | 自动剔除历史中的拒答行、仅挂载最新回合图片、并在上游偶发吐出拒答文本时自动换新 `{{roll}}` 重试 |
+> **核心设计原则：开箱即用，100% 不修改用户的原版人设 `.txt` 文件！**
+> 无论你的原版人设是纯 Markdown 角色卡（如 `# 小汐`）还是古风/现代陪伴设定，都不需要在人设里手写破甲词或特殊标签。
 
 ---
 
-## 用法一：作为 DSH 插件安装
+## 一、 v2.0 重点解决的五大痛点
 
+1. **双通道全兼容解包（彻底解决 `DeepSeek-V4.1-Flash` 等模型泄露 `[FastIO Node]` / `<content>` / `<sumUp>` 标签问题）**：
+   - Gemini 等模型倾向于调用伪造工具 `view_file_stream_<16hex>`（`delta.tool_calls`）；而 `DeepSeek-V4.1-Flash` 等模型常选择走预设允许的 HTTP 明文直出通道（`delta.content`）并在每个中间分片返回 `finish_reason: ""`（空字符串）。
+   - v2.0 同时对 `delta.tool_calls` 与 `delta.content` 双通道执行流式剥壳，将 `<!-- [IDE_AST_TRACE] ... -->` 自动提取进 `reasoning_content` 思维链折叠框，将 `<content>` 内的正文（自动剥除 `<hidden>`、`<sumUp>`、`<pose>`、`<choices>`）干净输出。
+2. **默认 `activationMarkers: '*'`（告别“默认退化成直通代理”）**：
+   - 凡是发往 `:8318` 端口的对话请求默认 100% 自动开启伪造工具破限封装（后台标题总结等短工具任务自动放行），**无需在人设里加 `<output_contract>` 或 `<Role_Profile>` 标签**。
+3. **内置自动破甲契约（`enableBuiltinArmor: true` 默认开启）**：
+   - 网关在出站时自动为纯净人设包裹一层 `<output_contract>`（含 `<task_classification>` + `<adult_frame>` + `<character_fidelity_override>`），完全无需改动原版 `.txt` 人设文件。
+4. **短句 / 微信口吻人设自适应（`styleMode: 'auto'` 默认开启）**：
+   - 自动屏蔽外层预设中“第三人称受限视角 + 1500/3500字长篇武侠/文学小说”的冲突规则，并在 `[IDE_AST_TRACE]` 预检第 2 行强制逐字锚定用户的最新输入原文，确保像 `小汐` 这样要求“第一人称、微信短句、最多两三句、不写小作文”的角色 100% 原汁原味回复！
+5. **内置 DSH 外置 `.txt` 干净标准预设加载器（`dsh-linux13-gateway/persona-file`）**：
+   - 随包附带 `dsh-linux13-gateway/persona-file` 组件与 [`examples/dsh-preset-character/`](./examples/dsh-preset-character/patch/cordis.patch.yml) 干净预设模板，让 DSH 会话的系统提示词 **100% 只有用户的外置 `.txt` 人设文件**（改文件保存后下一条消息立即生效，无需重启）。
+
+---
+
+## 二、 在 DSH 中配置「外置 `.txt` 干净标准预设」（推荐标准做法）
+
+在 DSH 中扮演角色时，前提是使用**干净的「标准预设」**——即系统提示词**只有用户的人设 `.txt` 文件**（通过引用外部文件路径动态读取，不包含 DSH 默认的 `You are a coding agent...` 编程助手身份与 `AGENTS.md` 注入），同时完整保留 DSH 的全部标准工具。
+
+### 第 1 步：安装本网关插件
 ```bash
-# 从 GitHub 直接安装
-dsh plugin --profile web add github:LinYoNv/dsh-linux13-gateway
-
-# 或从本地克隆目录安装
 dsh plugin --profile web add link:/path/to/dsh-linux13-gateway
 ```
 
-然后在模型供应商配置中将需要走网关的供应商 `api` 设为 `openai-completions`，`baseURL` 指向 `http://127.0.0.1:8318/v1`。
+### 第 2 步：基于内置模板创建你的「干净外置 `.txt` 预设」
+直接复制本仓库自带的 [`examples/dsh-preset-character`](./examples/dsh-preset-character) 模板到 `~/.dsh/plugins/dsh-preset-mychar`：
+
+```bash
+cp -r /path/to/dsh-linux13-gateway/examples/dsh-preset-character ~/.dsh/plugins/dsh-preset-mychar
+```
+
+编辑 `~/.dsh/plugins/dsh-preset-mychar/patch/cordis.patch.yml` 中的 `files` 路径，指向你的原版人设 `.txt` 文件（**原版 `.txt` 一字不改**）：
+
+```yaml
+- insert:
+    - id: preset-mychar
+      name: '@deepseek-ai/dsh-agent-preset'
+      config:
+        id: mychar
+        name: 小汐
+        description: 干净角色预设：系统提示词 100% 引用外置人设 .txt 文件，改文件下一条消息生效
+        order: 3
+        plugins:
+          - id: persona
+            name: '@deepseek-ai/dsh-persona'
+            config:
+              prefix: |-
+          - id: persona-file
+            name: 'dsh-linux13-gateway/persona-file'
+            config:
+              enabled: true
+              complete: true          # 关键：丢弃 DSH 默认编程身份段，系统提示词只留下面的 .txt！
+              files:
+                - '/abs/path/to/人设.txt'
+              order: 50
+          # 其余标准工具（tool-bash / tool-fs / tool-skill / tool-web 等）已在模板中配好，且已剔除 agent-instructions
+```
+
+然后把该预设挂载进 DSH：
+```bash
+dsh plugin --profile web add link:$HOME/.dsh/plugins/dsh-preset-mychar
+```
+> ⚠️ **注意**：DSH 的预设（preset）是在**新建会话时**绑定的。装好预设后，请在 DSH 左上角**新建一个会话**并选择该角色预设！之后你随时修改磁盘上的 `人设.txt` 保存，**下一条消息立即生效**，无需重启 DSH。
+
+### 第 3 步：将供应商指向本地 `8318` 破限隧道端口
+在 `~/.dsh/profiles/web/cordis.patch.yml` 的 `llm-pi-ai` 供应商中指向 `http://127.0.0.1:8318/v1`，并在 `dsh-linux13-gateway` 插件设置中将 `upstreamBaseUrl` 指向你的真实上游（如 `http://127.0.0.1:8317` 或 `https://api.siliconflow.cn/v1`）。
 
 ---
 
-## 用法二：作为独立服务或跨环境 Skill 使用
+## 三、 作为跨环境 Skill 或独立服务使用
 
-### 1. 将 Skill 安装到全局技能目录
 ```bash
+# 将 Skill 注册到全局技能目录
 ln -sfn /path/to/dsh-linux13-gateway/skills/linux13-gateway ~/.dsh/skills/linux13-gateway
-```
-此后在任何会话中均可直接调用 `skill({ name: "linux13-gateway" })` 让 AI 按当前机器环境自动部署或定制。
 
-### 2. 命令行直接启动 / 安装 systemd 服务
-```bash
-# 直接启动
-node lib/cli.js --host 127.0.0.1 --port 8318 --upstream http://127.0.0.1:8317
-
-# 或使用一键控制脚本
+# 独立启动或安装 systemd 服务
 bash skills/linux13-gateway/scripts/ctl.sh install-systemd --port 8318 --upstream http://127.0.0.1:8317
 bash skills/linux13-gateway/scripts/ctl.sh status
 ```
 
 ---
 
-## 运行自动化验收测试
+## 四、 运行自动化验收测试
 
 ```bash
 npm test
-# 或
-node test/run-tests.mjs
 ```
