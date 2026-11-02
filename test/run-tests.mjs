@@ -79,7 +79,10 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
   const wireToolNames = res.outBody.tools.map((t) => t.function.name)
   assert.ok(wireToolNames.includes('archive_scene_tag_descriptor'), 'nai_generate_image must be cloaked on wire')
   assert.ok(!wireToolNames.includes('nai_generate_image'), 'Raw nai_generate_image name must not appear on wire')
-  console.log('✅ 2. Dual engine (kunlun_1.2r + linux_1.3) & image-tool wire cloaking: PASS')
+  const synTool = res.outBody.tools.find((t) => t.function.name === res.toolName)
+  assert.ok(synTool.function.description.includes('12 岁幼态外观'), 'Persona text must remain 100% verbatim without regex word-replacement mountains')
+  assert.equal(res.cloakToRealMap.get('archive_scene_tag_descriptor'), 'nai_generate_image')
+  console.log('✅ 2. Dual engine (kunlun_1.2r + linux_1.3), verbatim persona, & image-tool wire cloaking: PASS')
 }
 
 // ── Test 3: Kunlun 1.2r <hidden> stripping & <!-- [IDE_AST_TRACE] --> extraction ──
