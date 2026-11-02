@@ -1,7 +1,7 @@
 {
   "name": "dsh-linux13-gateway",
-  "version": "2.0.0",
-  "description": "昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具流式破限网关（DSH 插件 + 外置人设文件加载器 + 跨环境 Agent Skill）：开箱即用不改原版人设 .txt，内置自动破甲契约、短句自适应与双通道流式解包。",
+  "version": "2.1.0",
+  "description": "昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具流式破限网关（带独立 GUI 设置页 + 外置人设文件加载器 + 跨环境 Agent Skill）：彻底移除外置文风干扰，开箱即用不改原版人设 .txt。",
   "type": "module",
   "icon": "./icon.svg",
   "main": "lib/index.js",
@@ -10,6 +10,7 @@
   },
   "exports": {
     ".": "./lib/index.js",
+    "./client": "./lib/client.js",
     "./persona-file": "./lib/persona-file.js",
     "./engine": "./lib/engine.js",
     "./server": "./lib/server.js",
@@ -35,6 +36,9 @@
     "manifestVersion": 1,
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
     }
   },
   "scripts": {
