@@ -14,7 +14,7 @@
         listenHost: '127.0.0.1'
         listenPort: 8318
         upstreamBaseUrl: 'http://127.0.0.1:8317'
-        presetMode: 'kunlun_1.2r'
+        presetMode: 'linux_1.3'
         activationMarkers: '*'
         enableBuiltinArmor: true
         personaFile: ''

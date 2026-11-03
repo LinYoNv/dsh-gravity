@@ -1,6 +1,6 @@
 # dsh-linux13-gateway v2.0（昆仑 IDE 1.2r + Linux 1.3 双引擎 · DSH 插件 + 干净人设预设组件 + 跨环境 Skill）
 
-基于 **昆仑 IDE 1.2r (`kunlun_1.2r.json`)** 与 **Linux 1.3 (`linux_1.3.json`)** 伪造工具流式隧道协议（Synthetic ToolCall Stream Tunnel）的零依赖防截断与破限网关。
+基于 **Linux 1.3 (`linux_1.3.json`，默认主引擎)** 与 **昆仑 IDE 1.2r (`kunlun_1.2r.json`，备选引擎)** 伪造工具流式隧道协议（Synthetic ToolCall Stream Tunnel）的零依赖防截断与破限网关。
 
 > **核心设计原则：开箱即用，100% 不修改用户的原版人设 `.txt` 文件！**
 > 无论你的原版人设是纯 Markdown 角色卡（如 `# 小汐`）还是古风/现代陪伴设定，都不需要在人设里手写破甲词或特殊标签。

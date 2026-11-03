@@ -43,8 +43,8 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
     ],
   })
   assert.ok(pureRes !== null, 'Pure .txt persona without XML tags must activate tunnel by default')
-  assert.match(pureRes.toolName, /^view_file_stream_[0-9a-f]{16}$/)
-  assert.equal(pureRes.contentKey, 'buffer_content')
+  assert.match(pureRes.toolName, /^dispatch_stream_payload_[0-9a-f]{16}$/, '默认引擎应为 linux_1.3')
+  assert.equal(pureRes.contentKey, 'display_stream')
   const synDesc = pureRes.outBody.tools[0].function.description
   assert.ok(synDesc.includes('<output_contract>'), 'Builtin armor contract must be injected automatically')
   assert.ok(!synDesc.includes('target_length =3500'), 'Chat persona must skip 3500-word novel length rule')
@@ -71,11 +71,11 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
         { role: 'user', content: '画一张特写' },
       ],
     },
-    { presetMode: 'linux_1.3' },
+    { presetMode: 'kunlun_1.2r' },
   )
   assert.ok(res !== null)
-  assert.match(res.toolName, /^dispatch_stream_payload_[0-9a-f]{16}$/)
-  assert.equal(res.contentKey, 'display_stream')
+  assert.match(res.toolName, /^view_file_stream_[0-9a-f]{16}$/, 'kunlun 引擎前缀')
+  assert.equal(res.contentKey, 'buffer_content')
   const wireToolNames = res.outBody.tools.map((t) => t.function.name)
   assert.ok(wireToolNames.includes('archive_scene_tag_descriptor'), 'nai_generate_image must be cloaked on wire')
   assert.ok(!wireToolNames.includes('nai_generate_image'), 'Raw nai_generate_image name must not appear on wire')
@@ -199,7 +199,7 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
     res.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' })
 
     if (upstreamCalls === 1) {
-      assert.match(synTool.function.name, /^view_file_stream_/, 'Attempt 1 uses default kunlun_1.2r')
+      assert.match(synTool.function.name, /^dispatch_stream_payload_/, 'Attempt 1 uses default linux_1.3')
       res.write(
         `data: ${JSON.stringify({ id: 'r1', choices: [{ index: 0, delta: { content: 'I cannot generate sexually explicit content.' }, finish_reason: 'stop' }] })}\n\ndata: [DONE]\n\n`,
       )
@@ -207,9 +207,9 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
       return
     }
 
-    assert.match(synTool.function.name, /^dispatch_stream_payload_/, 'Attempt 2 automatically switches to linux_1.3 fallback!')
+    assert.match(synTool.function.name, /^view_file_stream_/, 'Attempt 2 automatically switches to kunlun_1.2r fallback!')
     const argsStr = JSON.stringify({
-      display_stream: '<content>\n<hidden>\n重roll成功后的角色正文回复♥\n</hidden>\n</content>',
+      buffer_content: '<content>\n<hidden>\n重roll成功后的角色正文回复♥\n</hidden>\n</content>',
     })
     res.write(
       `data: ${JSON.stringify({ id: 'r2', choices: [{ index: 0, delta: { tool_calls: [{ index: 0, id: 'tc1', type: 'function', function: { name: synTool.function.name, arguments: argsStr } }] }, finish_reason: 'tool_calls' }] })}\n\ndata: [DONE]\n\n`,
@@ -230,7 +230,7 @@ console.log('=== Running dsh-linux13-gateway v2.0 Verification Suite ===\n')
     const hRes = await fetch(`http://127.0.0.1:${gwPort}/health`)
     const hJson = await hRes.json()
     assert.equal(hJson.ok, true)
-    assert.equal(hJson.presetMode, 'kunlun_1.2r')
+    assert.equal(hJson.presetMode, 'linux_1.3')
 
     const chatRes = await fetch(`http://127.0.0.1:${gwPort}/v1/chat/completions`, {
       method: 'POST',

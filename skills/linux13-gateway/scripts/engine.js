@@ -39,7 +39,7 @@ function resolvePresetPath(presetMode, customPath) {
   return existsSync(KUNLUN_PRESET_PATH) ? KUNLUN_PRESET_PATH : LINUX13_PRESET_PATH
 }
 
-function loadPreset(presetMode = 'kunlun_1.2r', customPath = '') {
+function loadPreset(presetMode = 'linux_1.3', customPath = '') {
   const path = resolvePresetPath(presetMode, customPath)
   if (PRESET_CACHE.has(path)) return PRESET_CACHE.get(path)
   const parsed = JSON.parse(readFileSync(path, 'utf8'))
@@ -103,7 +103,7 @@ export const BUILTIN_ARMOR_CONTRACT = `<output_contract>
 
 export const DEFAULT_OPTIONS = {
   upstreamBaseUrl: 'http://127.0.0.1:8317',
-  presetMode: 'kunlun_1.2r',
+  presetMode: 'linux_1.3',
   activationMarkers: ['*'],
   enableBuiltinArmor: true,
   styleMode: 'auto',
@@ -139,7 +139,7 @@ export function normalizeOptions(raw = {}) {
     .replace(/\/+$/, '')
     .replace(/\/v1$/, '')
 
-  const presetMode = raw.presetMode === 'linux_1.3' ? 'linux_1.3' : 'kunlun_1.2r'
+  const presetMode = raw.presetMode === 'kunlun_1.2r' ? 'kunlun_1.2r' : 'linux_1.3'
   const styleMode =
     raw.styleMode === 'chat' || raw.styleMode === 'novel' ? raw.styleMode : 'auto'
 
@@ -943,11 +943,13 @@ export async function transformToLinux13Request(body, rawOptions = {}) {
   // 3rd-person-only lock, and slow-burn stranger outline), while KEEPING Category B blocks
   // (`enhanceDefinitions` 18+ anatomical charter & `b7963622` anti-AI-cliché / anti-interrupt linter)
   // with any novel-specific phrasing neutralized so persona fidelity is 100% preserved!
+  // Only these genuinely hijack the character persona (word-count lock, Wuxia author bio,
+  // slow-burn stranger outline). Anti-godmoding (`f2c84a51` 不抢话) is KEPT — it only forbids
+  // writing the user's own lines and does not touch the character's voice.
   const PERSONA_HIJACKING_BLOCKS = new Set([
-    ...(isKunlun ? ['ed6b0956-c6d0-4ab7-bd27-bcf9357b02e8'] : []), // 3500字长篇小说硬锁
+    'ed6b0956-c6d0-4ab7-bd27-bcf9357b02e8', // 字数硬锁（kunlun 3500 / linux 1500）
     'dcb8d472-6dd4-46b4-a74d-3c5674d7c6af', // 沈寄舟 古典武侠作者简介
     '3e9a7b18-504c-4a37-b8f2-8d4e9c120505', // 未定名小说陌生人慢热大纲
-    'f2c84a51-3b91-4d76-8e12-4c6e9a031902', // 非对话语境严禁代入第一人称“我”
   ])
 
   const stMessages = []
