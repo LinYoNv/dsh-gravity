@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 const HERE = dirname(fileURLToPath(import.meta.url))
 
 /** Suites in dependency order: the gateway first, then what wraps it. */
-const SUITES = ['e2e', 'plugin', 'config', 'install', 'profile', 'coexist']
+const SUITES = ['e2e', 'tools', 'plugin', 'config', 'install', 'profile', 'coexist']
 
 const rows = []
 let failed = 0

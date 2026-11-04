@@ -183,18 +183,23 @@ D:\你的路径\dsh-linux13-gateway
 npm test          # 等价于 node test/all.mjs
 ```
 
-六个套件也可以单独跑，改哪块跑哪块：
+七个套件也可以单独跑，改哪块跑哪块：
 
 ```bash
 node test/e2e.mjs       # 网关端到端：隧道、流式、拒答换引擎、断流、后台任务
+node test/tools.mjs     # 真工具不被误判成假工具（含前缀撞名、真假同轮混发）
 node test/plugin.mjs    # apply 接线、写入位置、不覆盖用户已有配置
-node test/config.mjs    # patch 与 schema 对齐、表单覆盖、skill 副本一致性
+node test/config.mjs    # patch 与 schema 对齐、表单覆盖、skill 副本、版本一致性
 node test/install.mjs   # 空 profile 装完能否出现供应商
 node test/profile.mjs   # 写入的 provider 过得了宿主校验规则
 node test/coexist.mjs   # 插件与 llm-pi-ai 共存不冲突
 ```
 
-`coexist.mjs` 和 `profile.mjs` 不是形式主义：它们分别守着一个真实踩过的坑 —— 抢注 adapter 会让整段供应商全部失效，写错字段形状会让宿主拒绝整个配置段。
+其中三条不是形式主义，各自守着一个真实踩过的坑：
+
+- **`coexist.mjs`** —— 抢注 adapter 会让该命名空间下所有供应商一起失效。
+- **`profile.mjs`** —— 字段形状写错会让宿主拒绝整个配置段。
+- **`tools.mjs`** —— 把真工具误判成假工具，会让模型发出的工具调用被静默吞掉。
 
 ### 关键约束
 
