@@ -38,6 +38,8 @@ function loadYaml() {
     'js-yaml',
     join(process.env.USERPROFILE ?? '', '.dsh', 'plugins', 'dsh-nai-image', 'test', '.fixtures', 'verify', 'node_modules', 'js-yaml'),
     join(process.env.USERPROFILE ?? '', '.dsh', 'profiles', 'desktop', 'node_modules', 'js-yaml'),
+    join(process.env.HOME ?? '', '.dsh', 'profiles', 'web', 'node_modules', 'js-yaml'),
+    '/usr/local/lib/node_modules/@deepseek-ai/dsh/node_modules/js-yaml',
   ]
   for (const candidate of candidates) {
     try {

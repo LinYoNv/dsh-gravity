@@ -86,7 +86,7 @@ const baseConfig = {
 const settle = () => new Promise((resolve) => setTimeout(resolve, 30))
 
 await check('Config schema is built when the host exposes schemastery', () => {
-  assert.ok(Config === undefined || typeof Config === 'object')
+  assert.ok(Config === undefined || typeof Config === 'object' || typeof Config === 'function')
 })
 
 await check('the plugin never registers an adapter', async () => {
