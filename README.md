@@ -177,6 +177,14 @@ D:\你的路径\dsh-linux13-gateway
 
 ### 测试
 
+一条命令跑全部：
+
+```bash
+npm test          # 等价于 node test/all.mjs
+```
+
+六个套件也可以单独跑，改哪块跑哪块：
+
 ```bash
 node test/e2e.mjs       # 网关端到端：隧道、流式、拒答换引擎、断流、后台任务
 node test/plugin.mjs    # apply 接线、写入位置、不覆盖用户已有配置

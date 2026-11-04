@@ -127,8 +127,10 @@ EOF
     ;;
 
   test)
-    if [[ -f "$SKILL_DIR/../../test/run-tests.mjs" ]]; then
-      "$NODE_BIN" "$SKILL_DIR/../../test/run-tests.mjs"
+    # Inside a checkout the full suite is available; a standalone skill copy has
+    # only these three scripts, so fall back to a syntax check.
+    if [[ -f "$SKILL_DIR/../../test/all.mjs" ]]; then
+      "$NODE_BIN" "$SKILL_DIR/../../test/all.mjs"
     else
       "$NODE_BIN" --check "$SCRIPT_DIR/engine.js"
       "$NODE_BIN" --check "$SCRIPT_DIR/server.js"
