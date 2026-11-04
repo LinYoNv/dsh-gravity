@@ -1,16 +1,22 @@
 # ============================================================================
-# dsh-linux13-gateway v2.1 —— 昆仑 IDE 1.2r / Linux 1.3 伪造工具网关（DSH 插件组合层）
+# dsh-linux13-gateway —— 昆仑 IDE 1.2r / Linux 1.3 伪造工具网关（DSH 插件组合层）
 #
-# - 自带「内置插件配置 -> 昆仑 1.2r / Linux 1.3 伪造工具网关」独立可视化设置页（lib/client.js）
-# - 已彻底移除预设中的所有外置文风/禁词表/作者简介块，100% 保持用户原版人设 .txt 的文风
-# - 默认启用 `kunlun_1.2r` 引擎（兼含 `linux_1.3` 可切换，且拒答时自动跨引擎重 roll）
-# - 默认 `activationMarkers: '*'` + `enableBuiltinArmor: true`
+# 装好并重启后，「设置 → 模型」里会多出一条「linux网关」供应商：
+#   · 地址指向本插件内嵌的网关 http://127.0.0.1:<listenPort>/v1
+#   · API 密钥留空，由你自己在卡片里填（上游中转站的 key）
+#   · 上游地址、引擎、破甲开关在「内置插件 → linux13 网关」页面里配
+#
+# 这条供应商行是插件运行时写进 llm-pi-ai 段的，不写在这个文件里 ——
+# patch 会整体替换目标条的 config，写这儿会把你已有的 provider 全抹掉。
+# 所以这里不能出现 llm-pi-ai 字样，test/install.mjs 会检查这一点。
 # ============================================================================
 - insert:
     - id: dsh-linux13-gateway
       name: './lib/index.js'
       config:
         enabled: true
+        displayName: 'linux网关'
+        apiKeyEnv: 'LINUX13_GATEWAY_API_KEY'
         listenHost: '127.0.0.1'
         listenPort: 8318
         upstreamBaseUrl: 'http://127.0.0.1:8317'
@@ -23,4 +29,6 @@
         maxRefusalRetries: 2
         cloakedImageTools: 'nai_generate_image,generate_image,draw_image,paint_image'
         memoryPrefetchUrl: ''
+        contextWindow: 1000000
+        models: 'deepseek-v4.1-flash'
         verbose: false

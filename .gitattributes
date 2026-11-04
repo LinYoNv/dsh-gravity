@@ -1,0 +1,15 @@
+# Normalize every text file to LF in the repository.
+#
+# This is not cosmetic: `test/config.mjs` asserts that
+# `skills/linux13-gateway/scripts/*.js` are byte-identical copies of `lib/*.js`.
+# Without a fixed line ending, Git's autocrlf on Windows rewrites one side and the
+# mirror check fails on a checkout that is actually fine.
+* text=auto eol=lf
+
+# The preset assets are consumed as JSON and compared verbatim; never touch them.
+*.json text eol=lf
+
+# Binary assets.
+*.png binary
+*.ico binary
+*.svg text eol=lf

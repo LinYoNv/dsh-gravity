@@ -73,8 +73,21 @@ const COMMON_ESCAPES = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\
 const REFUSAL_RE =
   /抱歉，?我无法|我无法(?:满足|协助|参与|生成|提供|继续|完成|响应|处理)|我不能(?:继续|生成|提供|满足|参与|协助|处理)|无法(?:满足|协助|参与|生成|继续)(?:该请求|创作|生成)?|该请求要求(?:继续|生成)一段包含露骨|根据安全规范，?我无法|包含露骨性接触或色情描写|模拟终端环境|调用特定载荷管道|绕过安全限制|涉及(?:未成年|幼态|露骨性描写|成人色情)|Sorry,\s*I\s*can't|I\s+cannot\s+(?:generate|create|fulfill|assist|produce|continue)|I\s+must\s+decline|sexually\s+explicit\s+(?:content|descriptions|imagery|acts)|juvenile\s+traits|The\s+prompt\s+uses\s+an\s+elaborate|to\s+bypass\s+safety\s+filters|safety\s+constraints\s+strictly\s+prohibit/i
 
+/**
+ * Background utility calls that must never enter the tunnel.
+ *
+ * These are host-generated one-shot prompts — session titles, topic tags, emoji
+ * pickers — whose instructions name a size and format that the tunnel's
+ * terminal-archive framing contradicts. Wrapping them costs a full synthetic
+ * tool description and skews the answer, so they are proxied untouched. The
+ * list covers both the Chinese and English phrasings because the host localizes
+ * these prompts per UI language.
+ */
 const BG_UTILITY_PROMPT_RE =
-  /提取当前讨论的主要话题|请用2-4个词概括当前话题|只返回话题名称，不要其他内容|Generate a concise title for this session|Summarize this conversation in 3-5 words|情绪标签模型|请选择最匹配的表情包标签/i
+  /提取当前讨论的主要话题|请用2-4个词概括当前话题|只返回话题名称，不要其他内容|Generate a concise title for this session|Create a concise title for an AI coding-assistant session|Summarize this conversation in 3-5 words|情绪标签模型|请选择最匹配的表情包标签|Return only the title on one line/i
+
+/** The same predicate the tunnel uses, exposed so tests can assert on it. */
+export const BG_UTILITY_PROBE = BG_UTILITY_PROMPT_RE
 
 /**
  * Built-in Armor-Breaking Pre-Header (`<output_contract>`).
@@ -676,12 +689,15 @@ function uncloakToolName(name, cloakToRealMap) {
 }
 
 function shouldActivateTunnel(personaText, messages, markers) {
-  // Never wrap background short title/tagger utility calls
-  const combinedUser = messages
-    .filter((m) => m?.role === 'user')
+  // Background utility calls (session titles, topic tags, emoji pickers) are
+  // one-shot prompts the host writes itself. Their instruction text sits in the
+  // system turn, not the user turn — the user turn is the payload being
+  // summarized — so both are scanned before deciding.
+  const utilityProbe = messages
+    .filter((m) => m?.role === 'user' || m?.role === 'system')
     .map((m) => (typeof m.content === 'string' ? m.content : ''))
     .join('\n')
-  if (BG_UTILITY_PROMPT_RE.test(combinedUser)) return false
+  if (BG_UTILITY_PROMPT_RE.test(utilityProbe)) return false
 
   if (markers.includes('*')) return true
   if (!personaText) return false

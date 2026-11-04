@@ -1,37 +1,51 @@
 # ============================================================================
-# DSH 干净「标准预设（外置人设 .txt 引用版）」模板
+# dsh-linux13-gateway —— 干净角色预设模板
 #
-# 原理：
-#   1. 挂载 `dsh-linux13-gateway/persona-file` 并开启 `complete: true`，
-#      直接把 DSH 默认注入的编程助手身份段（You are an AI agent...）、全局规则段
-#      等全部丢弃，系统提示词里【只有你外置 .txt 文件里的原版人设】！
-#   2. 移除 `agent-instructions` 插件，防止工作区的 AGENTS.md / CLAUDE.md
-#      作为 <system-reminder> 注入用户消息冲淡人设。
-#   3. 完整保留 DSH 标准预设（standard）的全部原生工具（读写文件、终端、搜索、技能等）。
-#   4. 外置 .txt 文件在每次发消息时动态重读，改完 .txt 保存后【下一条消息立即生效】，无需重启！
+# 这一份是标准预设的完整副本，只改了两处：
+#   ① id / name / description 换成本模板的
+#   ② persona-file 段的 files 指向你自己的人设 .txt
+#
+# 用法见 README「做一个自己的角色预设」：复制本目录 → 改 files 路径 →
+# 一条 dsh plugin 命令装上。全流程有逐条命令，不需要懂 YAML。
+#
+# 为什么 complete: true：
+#   它让系统提示词里【只剩】你人设 .txt 的内容 —— harness 身份、全局规则、
+#   工具说明段全部丢弃。运行时上下文（沙箱 / 批准 / 委派策略）走另一条通道，
+#   不受影响。想保留全局规则就把 complete 改成 false。
+#
+# 为什么没有 agent-instructions：
+#   它把 AGENTS.md / CLAUDE.md 以 <system-reminder> 塞进【用户消息】，
+#   complete 压不掉，删掉才能保证提示词干净。
 # ============================================================================
 - insert:
-    - id: preset-character
+    - id: preset-mychar
       name: '@deepseek-ai/dsh-agent-preset'
       config:
-        id: character
-        name: 角色陪伴
-        description: 干净角色预设：系统提示词 100% 来自外置人设 .txt 文件，改文件下一条消息即生效
-        order: 3
+        # ↓ 预设 id：小写、唯一
+        id: mychar
+        # ↓ 显示名：出现在「Agent 预设」选择器里
+        name: 我的角色
+        description: 系统提示词全部来自外置 txt，改文件后下一条消息生效
+        order: 10
         plugins:
+          # persona 段会被下面 persona-file 的 complete 丢弃，保留它只为
+          # ① 遮蔽部署级 persona ② 关掉 complete 时留个兜底。
           - id: persona
             name: '@deepseek-ai/dsh-persona'
             config:
               prefix: |-
+          # ★★★ 唯一必须改的地方 ★★★
           - id: persona-file
-            name: 'dsh-linux13-gateway/persona-file'
+            name: 'dsh-persona-preset'
             config:
               enabled: true
+              # true = 系统提示词里只剩下面 files 的文件内容
               complete: true
               files:
-                - '/abs/path/to/人设.txt'
+                # 换成你自己人设 .txt 的绝对路径
+                - 'C:\Users\你的用户名\.dsh\人设.txt'
               order: 50
-          # ↓↓↓ 以下保留 DSH 标准预设（standard）的全部工具能力（已剔除 agent-instructions）↓↓↓
+          # ↓↓↓ 以下与标准预设一致，一般不用动 ↓↓↓
           - id: tool-bash
             name: '@deepseek-ai/dsh-tool-bash'
             disabled: !!js process.platform === 'win32'
@@ -54,6 +68,27 @@
             name: '@deepseek-ai/dsh-command-goal'
           - id: tool-goal
             name: '@deepseek-ai/dsh-tool-goal'
+          - id: planning
+            name: cordis:group
+            group: true
+            isolate:
+              planMode: true
+            config:
+              - id: plan-mode
+                name: '@deepseek-ai/dsh-plan-mode'
+                config:
+                  section: |
+                    You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                    Explore first. Use non-mutating reads, searches, static analysis, and checks to ground the plan in the actual repository. Do not edit or write files, change configuration, run formatters or code generation that rewrites tracked files, commit, or otherwise carry out the plan. Prefer existing functions and patterns over new machinery.
+
+                    The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged. Do not use todo_write to track this planning phase: it tracks implementation after an approved plan, while the plan itself belongs in exit_plan_mode.
+
+                    Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer. Do not ask the user where code lives or how current behavior works when you can find out.
+
+                    Make the plan decision-complete: state the goal and success criteria; group implementation changes by subsystem; identify public API, schema, and data-flow changes; cover edge cases, failure modes, tests, acceptance criteria, and explicit assumptions. Keep it concise enough to review but detailed enough that another engineer can implement it without making design decisions.
+
+                    When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and implementation begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with implementation.
           - id: compaction
             name: cordis:group
             group: true
