@@ -1,4 +1,4 @@
-# dsh-linux13-gateway v2.2
+# dsh-linux13-gateway v2.3
 
 昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具流式隧道网关，作为 DeepSeek Harness（DSH）插件运行。
 
@@ -205,6 +205,10 @@ node test/coexist.mjs   # 插件与 llm-pi-ai 共存不冲突
 3. **改完 `lib/*.js` 要同步 `skills/linux13-gateway/scripts/`。** 那份副本是独立的，`test/config.mjs` 会检查字节一致。
 
 ---
+
+## 变更记录
+
+见 [CHANGELOG.md](./CHANGELOG.md)。2.3.0 修掉了一个会连带伤人的问题：早期版本抢注 LLM adapter，与 `llm-pi-ai` 冲突后会让该命名空间下所有供应商一起失效。如果你从更早的版本升级，建议先读那一节。
 
 ## 许可
 

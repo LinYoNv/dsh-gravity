@@ -150,6 +150,26 @@ await check('the skill ships byte-identical copies of the runtime modules', () =
   }
 })
 
+await check('the declared version agrees across the manifest, README and changelog', () => {
+  // A version that drifts between files is how `/health` once reported 2.0.0 for
+  // a 2.1.0 package. `/health` now reads the manifest, so the remaining risk is
+  // documentation claiming a release that does not exist.
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/)
+
+  const readme = readFileSync(join(ROOT, 'README.md'), 'utf8')
+  const heading = readme.match(/^# .+? v(\d+\.\d+)/m)
+  assert.ok(heading, 'README title carries no version')
+  assert.equal(heading[1], pkg.version.split('.').slice(0, 2).join('.'), 'README version is stale')
+
+  const changelog = readFileSync(join(ROOT, 'CHANGELOG.md'), 'utf8')
+  const newest = changelog.match(/^## \[(\d+\.\d+\.\d+)\]/m)
+  assert.ok(newest, 'CHANGELOG has no released section')
+  assert.equal(newest[1], pkg.version, 'CHANGELOG newest entry is not the released version')
+
+  assert.ok(pkg.files.includes('CHANGELOG.md'), 'CHANGELOG must ship with the package')
+})
+
 await check('profile patch overrides only what it names', () => {
   let doc
   try {
