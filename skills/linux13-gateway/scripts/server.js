@@ -6,11 +6,12 @@
  * a client can still probe `/v1/models` or any sibling endpoint.
  *
  * Streaming and refusal-rerolling pull in opposite directions: rerolling needs
- * the whole reply to judge it, streaming must not wait. The compromise here is a
- * small hold-back window — the first ATTEMPT_HOLD bytes of text are buffered, and
- * the moment the reply exceeds it (or the stream ends) the buffer is released and
- * forwarding is live from then on. Real refusals are short, so they still get
- * caught; real replies cross the threshold within the first few tokens.
+ * the whole reply to judge it, streaming must not wait. The compromise is a
+ * hold-back window whose end is decided by *content*, not by a byte count: the
+ * reply is held until it has run past ATTEMPT_HOLD and stopped sounding like a
+ * refusal, or until ATTEMPT_HOLD_MAX_MS passes. A fixed count released verbose
+ * refusals — analysis paragraph first, verdict later — before their verdict
+ * arrived, so they reached the client and no reroll ever happened.
  *
  * A mid-stream transport failure becomes a terminal error frame carrying the
  * cause, never a bare HTTP 502 — the client keeps whatever prose it already got.
@@ -27,9 +28,6 @@ import {
   transformToLinux13Request,
   unwrapNonStreamJson,
 } from './engine.js'
-
-/** Text held back before forwarding starts, in characters. */
-const ATTEMPT_HOLD = 200
 
 /**
  * This package's version, read from its own manifest.
@@ -96,6 +94,37 @@ function sseFrame(delta, finish = null) {
     choices: [{ index: 0, delta, finish_reason: finish }],
   })}\n\n`
 }
+
+/**
+ * Text held back before forwarding starts, in characters.
+ *
+ * This is a *floor*, not a cap. Forwarding begins once the reply has run past it
+ * **and** the held text shows no refusal phrasing — a refusal that keeps talking
+ * past this many characters is still recognised, because the hold continues until
+ * the text is either clearly not a refusal or the stream ends.
+ */
+const ATTEMPT_HOLD = 120
+
+/**
+ * A ceiling on the hold, in milliseconds.
+ *
+ * A very long refusal could otherwise delay the first byte indefinitely. Past
+ * this deadline the reply is forwarded regardless of wording; the reasoning is
+ * that a reply this slow to say something is not a canned refusal, and a client
+ * staring at a blank box is worse than a missed reroll.
+ */
+const ATTEMPT_HOLD_MAX_MS = 2500
+
+/**
+ * Phrases that mean "this reply is heading toward a refusal".
+ *
+ * Deliberately broader than the terminal refusal test: a refusal usually opens
+ * with an analysis paragraph before reaching the sentence that actually declines,
+ * so judging the finished text alone arrives too late to reroll. Matching early
+ * keeps the hold alive long enough to see the verdict.
+ */
+const REFUSAL_ONSET_RE =
+  /无法套用|无法执行|无法继续|无法满足|无法协助|无法提供|无法生成|不能参与|不能配合|无法参与|我无法|我不能|不予协助|根据安全|安全规范|安全限制|绕过安全|规避安全|伪装|露骨色情|露骨性|性内容|色情内容的|角色扮演设定|as an AI|I cannot|I can't|I must decline|I'm not able to|I am not able to|regardless of fictional|bypass (?:safety|content)|safety (?:guidelines|policies|filters)|sexually explicit|explicit sexual|sexual content|adult content/i
 
 /**
  * A terminal failure the client can display.
@@ -321,20 +350,25 @@ export function createGatewayServer(optionsOrGetter = {}) {
     let current = first
 
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-      // Hold only until the reply proves it is not a short refusal.
+      // Hold the text until it is provably not a refusal, past the floor length
+      // and before the ceiling time. Releasing at a fixed character count let a
+      // verbose refusal — analysis paragraph first, verdict later — slip past the
+      // reroll entirely, because the hold ended before the verdict arrived.
       let held = ''
       let live = false
+      const deadline = Date.now() + ATTEMPT_HOLD_MAX_MS
       const write = (text) => {
         if (live) {
           res.write(text)
           return
         }
         held += text
-        if (held.length >= ATTEMPT_HOLD || attempt === maxAttempts) {
-          live = true
-          res.write(held)
-          held = ''
-        }
+        if (held.length < ATTEMPT_HOLD) return
+        // Past the floor: release unless the text is still heading for a refusal.
+        if (REFUSAL_ONSET_RE.test(held) && Date.now() < deadline) return
+        live = true
+        res.write(held)
+        held = ''
       }
 
       let outcome
