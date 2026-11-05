@@ -25,6 +25,14 @@ const ROOT = join(import.meta.dirname, '..')
 const MIRRORED = ['engine.js', 'server.js', 'cli.js']
 
 /**
+ * Assets the skill ships a copy of.
+ *
+ * The tunnel reads its envelope from whichever copy is nearest, so a stale asset
+ * means the skill silently keeps wording the plugin has already dropped.
+ */
+const MIRRORED_ASSETS = ['linux_1.3.json', 'kunlun_1.2r.json']
+
+/**
  * Resolve `js-yaml` from wherever it exists.
  *
  * The package ships no dependencies, so the module is borrowed from the host or
@@ -149,6 +157,16 @@ await check('the skill ships byte-identical copies of the runtime modules', () =
     const source = readFileSync(join(ROOT, 'lib', file))
     const mirror = readFileSync(join(ROOT, 'skills', 'linux13-gateway', 'scripts', file))
     assert.ok(source.equals(mirror), `skills/linux13-gateway/scripts/${file} is stale; re-copy it from lib/`)
+  }
+})
+
+await check('the skill ships byte-identical copies of the preset assets', () => {
+  // The envelope wording lives in these files. A stale copy under skills/ keeps
+  // the tell words alive on that path even after assets/ was cleaned.
+  for (const file of MIRRORED_ASSETS) {
+    const source = readFileSync(join(ROOT, 'assets', file))
+    const mirror = readFileSync(join(ROOT, 'skills', 'linux13-gateway', 'assets', file))
+    assert.ok(source.equals(mirror), `skills/linux13-gateway/assets/${file} is stale; re-copy it from assets/`)
   }
 })
 
