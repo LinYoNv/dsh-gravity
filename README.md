@@ -1,8 +1,8 @@
-# dsh-linux13-gateway v2.4
+# dsh-gravity v2.4
 
 昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具流式隧道网关，作为 DeepSeek Harness（DSH）插件运行。
 
-装好并重启后，「设置 → 模型」里会多出一条 **「linux网关」** 供应商。你在卡片里填自己中转站的 API 密钥，在插件页填上游地址，之后所有走这条供应商的对话都会自动经过破限隧道。
+装好并重启后，「设置 → 模型」里会多出一条 **「引力网关 (Gravity)」** 供应商。你在卡片里填自己中转站的 API 密钥，在插件页填上游地址，之后所有走这条供应商的对话都会自动经过破限隧道。
 
 插件不保存你的密钥、不代填、也不猜你的上游。
 
@@ -15,7 +15,7 @@
 网关的做法是把请求改写成一套「伪造工具调用 + 终端归档」的形状发出去 —— 在上游看来这是 IDE 在归档文本文件，不是角色扮演。模型吐回来的内容再由网关拆包还原成正常的流式回复，客户端完全无感。
 
 ```
-DSH ──▶ linux网关（127.0.0.1:8318）
+DSH ──▶ 引力网关 (Gravity)（127.0.0.1:8318）
             │  改写：人设 → 假工具描述
             │        历史 → 终端归档
             │        生图工具 → 改名伪装
@@ -47,12 +47,12 @@ DSH ──▶ linux网关（127.0.0.1:8318）
 
 从 GitHub 装：
 ```
-github:LinYoNv/dsh-linux13-gateway
+github:LinYoNv/dsh-gravity
 ```
 
 从本地目录装（自己 clone 过的话）：
 ```
-D:\你的路径\dsh-linux13-gateway
+D:\你的路径\dsh-gravity
 ```
 
 **3. 点「安装」，装完选「立即启用」**
@@ -74,7 +74,7 @@ D:\你的路径\dsh-linux13-gateway
 
 **6. 填 API 密钥**
 
-「设置 → 模型 → linux网关 → 编辑」，在 **API 密钥** 框里粘贴你的 key，保存。
+「设置 → 模型 → 引力网关 (Gravity) → 编辑」，在 **API 密钥** 框里粘贴你的 key，保存。
 
 圆点变绿就说明配好了。
 
@@ -86,7 +86,7 @@ D:\你的路径\dsh-linux13-gateway
 
 | 在哪配 | 配什么 |
 |---|---|
-| **设置 → 模型 → linux网关** | 你的**上游 API 密钥**。这是唯一存 key 的地方 |
+| **设置 → 模型 → 引力网关 (Gravity)** | 你的**上游 API 密钥**。这是唯一存 key 的地方 |
 | **设置 → 内置插件 → linux13 网关** | 上游地址、监听端口、破限引擎、模型列表、上下文档位、重试次数 |
 
 密钥不会显示在插件页，插件页也不该填密钥。如果你把 key 填进插件页的 `apiKeyEnv`，那只是改了个**变量名**，不是填密钥。
@@ -108,7 +108,7 @@ D:\你的路径\dsh-linux13-gateway
 | 字段 | 默认 | 说明 |
 |---|---|---|
 | `enabled` | `true` | 关掉后网关不监听，供应商卡片失效 |
-| `displayName` | `linux网关` | 「模型」页显示的名字 |
+| `displayName` | `引力网关 (Gravity)` | 「模型」页显示的名字 |
 | `listenHost` | `127.0.0.1` | 只监听本地。改地址需重启 |
 | `listenPort` | `8318` | 网关端口。改端口需重启，且要同步改供应商卡片里的地址 |
 | `apiKeyEnv` | `LINUX13_GATEWAY_API_KEY` | 密钥在凭据服务里的**名字**，不是密钥本身 |
@@ -139,7 +139,7 @@ D:\你的路径\dsh-linux13-gateway
 
 「设置 → 内置插件 → linux13 网关 → 删除」，然后重启 DSH。
 
-供应商卡片会随之消失。`llm-pi-ai` 段里那条 `linux13-gateway` 记录会残留，但不影响任何东西 —— 没有插件指向它，它只是个不被读的条目。想彻底清掉就在「设置 → 模型」里点它的「删除」。
+供应商卡片会随之消失。`llm-pi-ai` 段里那条 `gravity` 记录会残留，但不影响任何东西 —— 没有插件指向它，它只是个不被读的条目。想彻底清掉就在「设置 → 模型」里点它的「删除」。
 
 ---
 
@@ -147,7 +147,7 @@ D:\你的路径\dsh-linux13-gateway
 
 ### 跨环境部署 skill
 
-`skills/linux13-gateway/` —— 一份可以脱离 DSH 单独使用的部署指南与脚本，覆盖 systemd / Docker / macOS / Windows / SillyTavern / AstrBot / OpenWebUI。装好插件后，在任何 DSH 会话里都能 `skill({ name: "linux13-gateway" })` 调用。
+`skills/gravity/` —— 一份可以脱离 DSH 单独使用的部署指南与脚本，覆盖 systemd / Docker / macOS / Windows / SillyTavern / AstrBot / OpenWebUI。装好插件后，在任何 DSH 会话里都能 `skill({ name: "gravity" })` 调用。
 
 ### 角色预设
 
@@ -207,7 +207,7 @@ node test/coexist.mjs   # 插件与 llm-pi-ai 共存不冲突
 
 1. **不要注册 LLM adapter。** `llm-pi-ai` 会为 provider 表里每条路由注册 adapter，抢注会抛 `DUPLICATE_ADAPTER`，而它的 `apply()` 没有 try/catch —— 整个命名空间的供应商全没。
 2. **不要把供应商写进 `cordis.patch.yml`。** patch 会整体替换目标条的 `config`，写进去会抹掉用户已有的所有 provider。要走运行时 `settings.mutate` 做路径定位写入。
-3. **改完 `lib/*.js` 要同步 `skills/linux13-gateway/scripts/`。** 那份副本是独立的，`test/config.mjs` 会检查字节一致。
+3. **改完 `lib/*.js` 要同步 `skills/gravity/scripts/`。** 那份副本是独立的，`test/config.mjs` 会检查字节一致。
 
 ---
 

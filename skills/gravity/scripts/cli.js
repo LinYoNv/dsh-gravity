@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Standalone CLI runner for `dsh-linux13-gateway` (v2.0 — Kunlun 1.2r + Linux 1.3).
+ * Standalone CLI runner for `dsh-gravity` (v2.0 — Kunlun 1.2r + Linux 1.3).
  */
 
 import { DEFAULT_OPTIONS } from './engine.js'
@@ -8,14 +8,14 @@ import { createGatewayServer } from './server.js'
 
 function parseCliArgs(argv) {
   const opts = {
-    listenHost: process.env.LINUX13_HOST || '127.0.0.1',
-    listenPort: Number(process.env.LINUX13_PORT || 8318),
-    upstreamBaseUrl: process.env.LINUX13_UPSTREAM || DEFAULT_OPTIONS.upstreamBaseUrl,
-    presetMode: process.env.LINUX13_PRESET_MODE || DEFAULT_OPTIONS.presetMode,
-    activationMarkers: process.env.LINUX13_MARKERS || '*',
+    listenHost: process.env.GRAVITY_HOST || process.env.LINUX13_HOST || '127.0.0.1',
+    listenPort: Number(process.env.GRAVITY_PORT || process.env.LINUX13_PORT || 8318),
+    upstreamBaseUrl: process.env.GRAVITY_UPSTREAM || process.env.LINUX13_UPSTREAM || DEFAULT_OPTIONS.upstreamBaseUrl,
+    presetMode: process.env.GRAVITY_PRESET_MODE || process.env.LINUX13_PRESET_MODE || DEFAULT_OPTIONS.presetMode,
+    activationMarkers: process.env.GRAVITY_MARKERS || process.env.LINUX13_MARKERS || '*',
     enableBuiltinArmor: process.env.LINUX13_BUILTIN_ARMOR !== '0' && process.env.LINUX13_BUILTIN_ARMOR !== 'false',
     styleMode: process.env.LINUX13_STYLE_MODE || 'auto',
-    personaFile: process.env.LINUX13_PERSONA_FILE || '',
+    personaFile: process.env.GRAVITY_PERSONA_FILE || process.env.LINUX13_PERSONA_FILE || '',
     stripCodingBoilerplate: process.env.LINUX13_STRIP_BOILERPLATE !== '0',
     historyWindow: Number(process.env.LINUX13_WINDOW || DEFAULT_OPTIONS.historyWindow),
     maxRefusalRetries: Number(process.env.LINUX13_RETRIES ?? DEFAULT_OPTIONS.maxRefusalRetries),
@@ -27,7 +27,7 @@ function parseCliArgs(argv) {
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i]
     if (a === '-h' || a === '--help') {
-      console.log(`Usage: linux13-gateway [options]
+      console.log(`Usage: gravity [options]
 
 Options:
   --host <ip>            Listen address (default: 127.0.0.1, env: LINUX13_HOST)
@@ -68,7 +68,7 @@ const gw = createGatewayServer(cliOpts)
 
 const boundPort = await gw.listen(cliOpts.listenPort, cliOpts.listenHost)
 console.log(
-  `[linux13-gateway] v2.0 (${cliOpts.presetMode}) listening on http://${cliOpts.listenHost}:${boundPort} -> ${cliOpts.upstreamBaseUrl}`,
+  `[gravity] v2.0 (${cliOpts.presetMode}) listening on http://${cliOpts.listenHost}:${boundPort} -> ${cliOpts.upstreamBaseUrl}`,
 )
 
 const shutdown = async () => {

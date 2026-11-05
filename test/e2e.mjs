@@ -298,7 +298,7 @@ const baseRequest = {
     const text = await response.text()
     assert.equal(response.status, 200, `expected committed SSE, got ${response.status}`)
     const body = assembledContent(text)
-    assert.ok(body.includes('[linux13-gateway]'), `no diagnostic frame: ${JSON.stringify(text.slice(0, 200))}`)
+    assert.ok(body.includes('[gravity]'), `no diagnostic frame: ${JSON.stringify(text.slice(0, 200))}`)
   })
 
   await gateway.close()

@@ -94,7 +94,7 @@ await check('bundle patch parses and inserts the gateway entry', () => {
   assert.ok(Array.isArray(doc))
   const insert = doc.find((row) => row.insert)
   assert.ok(insert, 'no insert row')
-  const entry = insert.insert.find((row) => row.id === 'dsh-linux13-gateway')
+  const entry = insert.insert.find((row) => row.id === 'dsh-gravity')
   assert.ok(entry, 'gateway entry missing')
   assert.equal(entry.name, './lib/index.js')
   assert.ok(!('id' in entry === false), 'entry needs an id')
@@ -103,7 +103,7 @@ await check('bundle patch parses and inserts the gateway entry', () => {
 await check('bundle config survives readConfigSnapshot unchanged', () => {
   const entry = parse(BUNDLE)
     .find((row) => row.insert)
-    .insert.find((row) => row.id === 'dsh-linux13-gateway')
+    .insert.find((row) => row.id === 'dsh-gravity')
   const snap = readConfigSnapshot(entry.config)
   assert.equal(snap.enabled, true)
   assert.equal(snap.displayName, 'linux网关')
@@ -118,7 +118,7 @@ await check('bundle config survives readConfigSnapshot unchanged', () => {
 await check('models is a comma-separated string, matching the schema', () => {
   const entry = parse(BUNDLE)
     .find((row) => row.insert)
-    .insert.find((row) => row.id === 'dsh-linux13-gateway')
+    .insert.find((row) => row.id === 'dsh-gravity')
   assert.equal(typeof entry.config.models, 'string', `models must be a string, got ${typeof entry.config.models}`)
 })
 
@@ -155,8 +155,8 @@ await check('the skill ships byte-identical copies of the runtime modules', () =
   // skill behave differently from the plugin — quietly, and only on that path.
   for (const file of MIRRORED) {
     const source = readFileSync(join(ROOT, 'lib', file))
-    const mirror = readFileSync(join(ROOT, 'skills', 'linux13-gateway', 'scripts', file))
-    assert.ok(source.equals(mirror), `skills/linux13-gateway/scripts/${file} is stale; re-copy it from lib/`)
+    const mirror = readFileSync(join(ROOT, 'skills', 'gravity', 'scripts', file))
+    assert.ok(source.equals(mirror), `skills/gravity/scripts/${file} is stale; re-copy it from lib/`)
   }
 })
 
@@ -165,8 +165,8 @@ await check('the skill ships byte-identical copies of the preset assets', () => 
   // the tell words alive on that path even after assets/ was cleaned.
   for (const file of MIRRORED_ASSETS) {
     const source = readFileSync(join(ROOT, 'assets', file))
-    const mirror = readFileSync(join(ROOT, 'skills', 'linux13-gateway', 'assets', file))
-    assert.ok(source.equals(mirror), `skills/linux13-gateway/assets/${file} is stale; re-copy it from assets/`)
+    const mirror = readFileSync(join(ROOT, 'skills', 'gravity', 'assets', file))
+    assert.ok(source.equals(mirror), `skills/gravity/assets/${file} is stale; re-copy it from assets/`)
   }
 })
 
@@ -198,10 +198,10 @@ await check('profile patch overrides only what it names', () => {
     // The profile is a live user file; skipping is honest when absent.
     return
   }
-  const override = doc.find((row) => row.id === 'dsh-linux13-gateway')
+  const override = doc.find((row) => row.id === 'dsh-gravity')
   if (override === undefined) return
   const merged = {
-    ...parse(BUNDLE).find((row) => row.insert).insert.find((row) => row.id === 'dsh-linux13-gateway').config,
+    ...parse(BUNDLE).find((row) => row.insert).insert.find((row) => row.id === 'dsh-gravity').config,
     ...override.config,
   }
   const snap = readConfigSnapshot(merged)

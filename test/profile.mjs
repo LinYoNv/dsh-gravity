@@ -94,14 +94,14 @@ await check('the written section passes the host validation rules', async () => 
 await check('the profile sets the protocol the gateway actually speaks', async () => {
   const { ctx, section } = captureContext()
   await publishRoute(ctx, config())
-  const profile = section.providers['linux13-gateway']
+  const profile = section.providers['gravity']
   assert.equal(profile.api, 'openai-completions')
 })
 
 await check('the profile carries the credential reference, not a credential', async () => {
   const { ctx, section } = captureContext()
   await publishRoute(ctx, config())
-  const profile = section.providers['linux13-gateway']
+  const profile = section.providers['gravity']
   assert.equal(profile.apiKeyEnv, 'LINUX13_GATEWAY_API_KEY')
   assert.ok(!('apiKey' in profile), 'the section must never hold the key itself')
   assert.ok(!('token' in profile), 'the section must never hold a token')
@@ -110,7 +110,7 @@ await check('the profile carries the credential reference, not a credential', as
 await check('models entries carry id, name and a numeric context window', async () => {
   const { ctx, section } = captureContext()
   await publishRoute(ctx, config())
-  const [model] = section.providers['linux13-gateway'].models
+  const [model] = section.providers['gravity'].models
   assert.equal(model.id, 'deepseek-v4.1-flash')
   assert.equal(model.name, 'deepseek-v4.1-flash')
   assert.ok(Number.isInteger(model.contextWindow) && model.contextWindow > 0)
@@ -125,20 +125,20 @@ await check('a section with other providers stays valid after the write', async 
   })
   await publishRoute(ctx, config())
   assert.equal(firstViolation(section.providers), undefined)
-  assert.deepEqual(Object.keys(section.providers).sort(), ['cpa', 'linux13-gateway', 'xyuan-ds'])
+  assert.deepEqual(Object.keys(section.providers).sort(), ['cpa', 'gravity', 'xyuan-ds'])
 })
 
 await check('an empty model list still produces a writable profile', async () => {
   const { ctx, section } = captureContext()
   await publishRoute(ctx, config({ models: [] }))
   assert.equal(firstViolation(section.providers), undefined)
-  assert.deepEqual(section.providers['linux13-gateway'].models, [])
+  assert.deepEqual(section.providers['gravity'].models, [])
 })
 
 await check('a port other than 8318 reaches the profile', async () => {
   const { ctx, section } = captureContext()
   await publishRoute(ctx, config({ listenPort: 9001 }))
-  assert.equal(section.providers['linux13-gateway'].baseURL, 'http://127.0.0.1:9001/v1')
+  assert.equal(section.providers['gravity'].baseURL, 'http://127.0.0.1:9001/v1')
 })
 
 await check('an existing route is never overwritten', async () => {
@@ -146,7 +146,7 @@ await check('an existing route is never overwritten', async () => {
   // Models page; a plugin reload must not silently undo that.
   const existing = {
     providers: {
-      'linux13-gateway': {
+      'gravity': {
         displayName: '我自己起的名字',
         api: 'openai-completions',
         baseURL: 'http://127.0.0.1:9999/v1',
@@ -157,18 +157,18 @@ await check('an existing route is never overwritten', async () => {
   }
   const { ctx, section } = captureContext(existing)
   await publishRoute(ctx, config())
-  assert.deepEqual(section.providers['linux13-gateway'], existing.providers['linux13-gateway'])
+  assert.deepEqual(section.providers['gravity'], existing.providers['gravity'])
 })
 
 await check('a route without a credential reference gets one filled in', async () => {
   const existing = {
     providers: {
-      'linux13-gateway': { displayName: 'x', api: 'openai-completions', baseURL: 'http://127.0.0.1:8318/v1' },
+      'gravity': { displayName: 'x', api: 'openai-completions', baseURL: 'http://127.0.0.1:8318/v1' },
     },
   }
   const { ctx, section } = captureContext(existing)
   await publishRoute(ctx, config())
-  const profile = section.providers['linux13-gateway']
+  const profile = section.providers['gravity']
   assert.equal(profile.apiKeyEnv, 'LINUX13_GATEWAY_API_KEY')
   // Everything else the user had stays put.
   assert.equal(profile.baseURL, 'http://127.0.0.1:8318/v1')

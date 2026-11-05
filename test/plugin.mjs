@@ -59,7 +59,7 @@ function makeContext(options = {}) {
     },
   }
   const ctx = {
-    fiber: { entry: { options: { id: 'dsh-linux13-gateway' } } },
+    fiber: { entry: { options: { id: 'dsh-gravity' } } },
     effect(fn) {
       state.effects += 1
       const dispose = fn()
@@ -139,7 +139,7 @@ await check("a user's existing providers survive the write", async () => {
   const { ctx, state } = makeContext({ existing })
   apply(ctx, baseConfig)
   await settle()
-  assert.deepEqual(Object.keys(state.section.providers).sort(), ['cpa', 'linux13-gateway', 'xyuan-ds'])
+  assert.deepEqual(Object.keys(state.section.providers).sort(), ['cpa', 'gravity', 'xyuan-ds'])
   assert.equal(state.section.providers.cpa.baseURL, 'http://example.invalid/v1')
 })
 

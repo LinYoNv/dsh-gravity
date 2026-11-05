@@ -90,10 +90,10 @@ function engineForAttempt(opts, attempt, modelName = '') {
  */
 function sseFrame(delta, finish = null) {
   return `data: ${JSON.stringify({
-    id: `chatcmpl-linux13-${Date.now().toString(36)}`,
+    id: `chatcmpl-gravity-${Date.now().toString(36)}`,
     object: 'chat.completion.chunk',
     created: Math.floor(Date.now() / 1000),
-    model: 'linux13-gateway',
+    model: 'gravity',
     choices: [{ index: 0, delta, finish_reason: finish }],
   })}\n\n`
 }
@@ -140,7 +140,7 @@ const REFUSAL_ONSET_RE =
  * @returns an SSE frame carrying the failure text.
  */
 function sseErrorFrame(message, status) {
-  return sseFrame({ content: `[linux13-gateway] 上游请求失败${status ? ` (HTTP ${status})` : ''}：${message}` }, 'stop')
+  return sseFrame({ content: `[gravity] 上游请求失败${status ? ` (HTTP ${status})` : ''}：${message}` }, 'stop')
 }
 
 /**
@@ -241,7 +241,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
 
     if (opts.verbose) {
       console.log(
-        `[linux13-gateway] POST ${urlPath} model=${parsed.model} engine=${opts.presetMode} tunneled=${Boolean(first.trans)} stream=${Boolean(parsed.stream)}`,
+        `[gravity] POST ${urlPath} model=${parsed.model} engine=${opts.presetMode} tunneled=${Boolean(first.trans)} stream=${Boolean(parsed.stream)}`,
       )
     }
 
@@ -399,7 +399,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
       }
 
       if (opts.verbose) {
-        console.warn(`[linux13-gateway] attempt ${attempt} looked like a refusal; rerolling on the other engine`)
+        console.warn(`[gravity] attempt ${attempt} looked like a refusal; rerolling on the other engine`)
       }
       const retryOpts = engineForAttempt(opts, attempt + 1, parsed.model)
       current = await attemptFetch(retryOpts)
@@ -427,7 +427,7 @@ export function createGatewayServer(optionsOrGetter = {}) {
       if (req.method === 'GET' && (urlPath === '/health' || urlPath === '/v1/health')) {
         const payload = JSON.stringify({
           ok: true,
-          service: 'linux13-gateway',
+          service: 'gravity',
           version: PACKAGE_VERSION,
           presetMode: opts.presetMode,
           activationMarkers: opts.activationMarkers,

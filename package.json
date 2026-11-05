@@ -1,12 +1,12 @@
 {
-  "name": "dsh-linux13-gateway",
+  "name": "dsh-gravity",
   "version": "2.4.0",
-  "description": "昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具网关：装好即在「模型」页出现一条「linux网关」供应商，上游地址与密钥都由用户自己填，插件只管转发与破限。",
+  "description": "引力网关（Gravity）—— 昆仑 IDE 1.2r / Linux 1.3 双引擎流式破限网关（DSH 插件 + 独立可视化配置页 + 跨环境 Agent Skill）",
   "type": "module",
   "icon": "./icon.svg",
   "main": "lib/index.js",
   "bin": {
-    "linux13-gateway": "./lib/cli.js"
+    "gravity": "./lib/cli.js"
   },
   "exports": {
     ".": "./lib/index.js",
@@ -25,7 +25,7 @@
     "lib/*.js",
     "assets/*.json",
     "examples/**",
-    "skills/linux13-gateway/**",
+    "skills/gravity/**",
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",
@@ -63,8 +63,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LinYoNv/dsh-linux13-gateway.git"
+    "url": "git+https://github.com/LinYoNv/dsh-gravity.git"
   },
-  "homepage": "https://github.com/LinYoNv/dsh-linux13-gateway#readme",
+  "homepage": "https://github.com/LinYoNv/dsh-gravity#readme",
   "license": "MIT"
 }

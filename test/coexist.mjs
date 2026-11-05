@@ -184,8 +184,8 @@ await check("the user's own providers keep working through pi-ai", async () => {
   await settle()
 
   assert.doesNotThrow(() => piAiApply(llm, section.providers))
-  assert.deepEqual([...llm.adapters.keys()].sort(), ['cpa', 'linux13-gateway', 'xyuan-ds'])
-  assert.deepEqual([...llm.directory.keys()].sort(), ['cpa', 'linux13-gateway', 'xyuan-ds'])
+  assert.deepEqual([...llm.adapters.keys()].sort(), ['cpa', 'gravity', 'xyuan-ds'])
+  assert.deepEqual([...llm.directory.keys()].sort(), ['cpa', 'gravity', 'xyuan-ds'])
 })
 
 await check('reloading the plugin does not double-register anything', async () => {
@@ -225,7 +225,7 @@ await check('a route the user renamed still resolves', async () => {
   const llm = makeLlm()
   const section = {
     providers: {
-      'linux13-gateway': {
+      'gravity': {
         displayName: '我的网关',
         api: 'openai-completions',
         baseURL: 'http://127.0.0.1:18318/v1',
@@ -253,8 +253,8 @@ await check('a route the user renamed still resolves', async () => {
     models: [{ id: 'deepseek-v4.1-flash' }],
   }))
 
-  assert.equal(section.providers['linux13-gateway'].displayName, '我的网关')
-  assert.equal(section.providers['linux13-gateway'].apiKeyEnv, 'MY_REF')
+  assert.equal(section.providers['gravity'].displayName, '我的网关')
+  assert.equal(section.providers['gravity'].apiKeyEnv, 'MY_REF')
   assert.doesNotThrow(() => piAiApply(llm, section.providers))
 })
 

@@ -91,7 +91,7 @@ function makeContext() {
   const state = { adapters: [], writes: [], effects: 0 }
   let llm
   const ctx = {
-    fiber: { entry: { options: { id: 'dsh-linux13-gateway' } } },
+    fiber: { entry: { options: { id: 'dsh-gravity' } } },
     effect(fn) {
       state.effects += 1
       const dispose = fn()
@@ -133,7 +133,7 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 20))
 await check('a bare profile gains exactly one entry from the bundle patch', () => {
   const entries = applyEntryPatches([], bundlePatch)
   assert.equal(entries.length, 1)
-  assert.equal(entries[0].id, 'dsh-linux13-gateway')
+  assert.equal(entries[0].id, 'dsh-gravity')
   assert.equal(entries[0].name, './lib/index.js')
 })
 
@@ -148,7 +148,7 @@ await check('the plugin module imports from the package root', async () => {
   const modulePath = join(ROOT, 'lib', 'index.js')
   assert.ok(existsSync(modulePath), 'lib/index.js missing')
   const module = await import(pathToFileURL(modulePath).href)
-  assert.equal(module.name, 'dsh-linux13-gateway')
+  assert.equal(module.name, 'dsh-gravity')
   assert.equal(typeof module.apply, 'function')
   assert.deepEqual(module.inject, ['settings'])
 })
@@ -164,7 +164,7 @@ await check('apply() publishes the provider row into llm-pi-ai', async () => {
   assert.equal(state.writes[0].ns, 'llm-pi-ai')
   const [op] = state.writes[0].ops
   assert.equal(op.op, 'set')
-  assert.deepEqual(op.path, ['providers', 'linux13-gateway'])
+  assert.deepEqual(op.path, ['providers', 'gravity'])
   assert.equal(op.value.displayName, 'linux网关')
   assert.match(op.value.baseURL, /^http:\/\/127\.0\.0\.1:8318\/v1$/)
   assert.equal(op.value.apiKeyEnv, 'LINUX13_GATEWAY_API_KEY')

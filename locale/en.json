@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Kunlun 1.2r / Linux 1.3 ToolCall Tunnel Gateway (Plugin + Skill)",
-    "description": "Dual-engine (Kunlun IDE 1.2r & Linux 1.3) ToolCall stream tunnel with built-in armor-breaker, conversational persona adaptation, DSH boilerplate stripping, and refusal auto-reroll."
+    "title": "Gravity Gateway",
+    "description": "Gravity dual-engine stream tunnel gateway with smart model routing, zero style pollution, and refusal auto-reroll."
   }
 }
