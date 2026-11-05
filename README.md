@@ -1,4 +1,4 @@
-# dsh-linux13-gateway v2.3
+# dsh-linux13-gateway v2.4
 
 昆仑 IDE 1.2r / Linux 1.3 双引擎伪造工具流式隧道网关，作为 DeepSeek Harness（DSH）插件运行。
 
