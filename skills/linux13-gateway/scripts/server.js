@@ -242,14 +242,23 @@ export function createGatewayServer(optionsOrGetter = {}) {
       )
     }
 
-    // Not tunneled: a utility call, or a forced tool_choice. Proxy untouched.
+    // Not tunneled: a utility call, a drawing turn, or a forced tool_choice.
+    //
+    // This must be a *streaming* proxy, not a buffered one. A drawing call is
+    // usually streamed too, and collapsing it into one `text()` would hand the
+    // client a complete JSON body where it expects SSE frames — the tool call
+    // would never be parsed, and the turn would look like the model said nothing.
     if (!first.trans) {
       const response = await fetch(upstreamUrl, { method: 'POST', headers, body: rawBody })
-      const text = await response.text()
       res.writeHead(response.status, {
         'content-type': response.headers.get('content-type') || 'application/json',
+        'cache-control': 'no-cache',
+        'x-accel-buffering': 'no',
       })
-      res.end(text)
+      if (response.body) {
+        for await (const chunk of response.body) res.write(chunk)
+      }
+      res.end()
       return
     }
 
