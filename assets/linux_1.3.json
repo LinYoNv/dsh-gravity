@@ -632,23 +632,23 @@
                 },
                 {
                     "identifier": "852bb336-587e-452e-b7f2-28dc9ccc77a7",
-                    "enabled": true
+                    "enabled": false
                 },
                 {
                     "identifier": "c17a8e29-45d2-4e81-9b63-0f15c7e8a3b1",
-                    "enabled": true
+                    "enabled": false
                 },
                 {
                     "identifier": "2a957109-58cd-4f79-8675-b304f20ffeda",
-                    "enabled": true
+                    "enabled": false
                 },
                 {
                     "identifier": "b7963622-325e-44c9-be42-55c1fde554a4",
-                    "enabled": true
+                    "enabled": false
                 },
                 {
                     "identifier": "f2c84a51-3b91-4d76-8e12-4c6e9a031902",
-                    "enabled": true
+                    "enabled": false
                 },
                 {
                     "identifier": "main",
